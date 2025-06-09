@@ -1,60 +1,46 @@
-# Star Wars API Application
+# SWStarter - Star Wars Search App
 
-This is a full-stack application that interacts with the Star Wars API, built with React and Laravel.
+## Descrição
 
-## Prerequisites
+Este projeto é uma aplicação fullstack para busca de personagens e filmes do universo Star Wars, utilizando a [Star Wars API (SWAPI)](https://swapi.dev/). O backend PHP/Laravel serve apenas como proxy entre o frontend React e a API externa, seguindo as melhores práticas para esse tipo de arquitetura.
 
-- Docker
-- Docker Compose
+## Estrutura
+- **Frontend:** React + TypeScript (pasta `frontend/`)
+- **Backend:** Laravel (pasta `backend/`)
+- **Banco de dados:** Não utilizado (backend é stateless)
+- **Docker:** Orquestra frontend, backend e banco (MySQL, apenas para compatibilidade, não é usado)
 
-## Getting Started
+## Como rodar o projeto
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd <repository-name>
-```
+### Pré-requisitos
+- Docker e Docker Compose instalados
 
-2. Start the application:
-```bash
-docker-compose up -d
-```
+### Passos
+1. **Build e start dos containers:**
+   ```bash
+   docker compose up --build -d
+   ```
+2. **Acesse o frontend:**
+   - [http://localhost:3000](http://localhost:3000)
+3. **Acesse o backend (API):**
+   - [http://localhost:8000/api/star-wars/characters/search?q=luke](http://localhost:8000/api/star-wars/characters/search?q=luke)
+   - [http://localhost:8000/api/star-wars/movies/search?q=hope](http://localhost:8000/api/star-wars/movies/search?q=hope)
 
-This will start:
-- Frontend (React) on http://localhost:3000
-- Backend (Laravel) on http://localhost:8000
-- MySQL database on port 3306
+## Endpoints disponíveis
 
-## Development
+- `GET /api/star-wars/characters/search?q=...` — Busca personagens na SWAPI
+- `GET /api/star-wars/movies/search?q=...` — Busca filmes na SWAPI
 
-### Frontend
-The frontend is a React application with TypeScript. The source code is located in the `frontend` directory.
+O backend apenas repassa a requisição para a SWAPI e retorna o JSON puro.
 
-### Backend
-The backend is a Laravel application. The source code is located in the `backend` directory.
+## Observações
+- Não há persistência de dados, estatísticas ou cache no backend.
+- O backend não depende do banco de dados para funcionar.
+- O frontend consome apenas os endpoints do backend, nunca acessa a SWAPI diretamente.
 
-## API Endpoints
+## Customização
+Se quiser adicionar endpoints para detalhes de personagem ou filme, basta criar novos métodos no controller que façam proxy para os endpoints correspondentes da SWAPI.
 
-The backend provides the following endpoints:
+---
 
-- `GET /api/characters` - Get Star Wars characters
-- `GET /api/statistics` - Get search statistics
-
-## Statistics
-
-The application maintains statistics about previous queries, which are recomputed every 5 minutes. The statistics include:
-- Top five queries with percentages
-- Average length of request timing
-- Most popular hour of day for overall search volume
-
-## Stopping the Application
-
-To stop the application:
-```bash
-docker-compose down
-```
-
-To stop and remove all data (including the database):
-```bash
-docker-compose down -v
-``` 
+Feito com ❤️ para o desafio LawnStarter. 

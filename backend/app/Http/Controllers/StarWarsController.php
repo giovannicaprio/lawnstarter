@@ -2,118 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\StarWarsService;
-use App\Models\SearchStatistic;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class StarWarsController extends Controller
 {
-    private StarWarsService $starWarsService;
-
-    public function __construct(StarWarsService $starWarsService)
+    public function searchPeople(Request $request)
     {
-        $this->starWarsService = $starWarsService;
-    }
-
-    public function getCharacters(Request $request): JsonResponse
-    {
-        $page = $request->input('page', 1);
-        $data = $this->starWarsService->getCharacters($page);
-
-        if (!$data) {
-            return response()->json([
-                'error' => 'Failed to fetch characters'
-            ], 500);
-        }
-
-        return response()->json($data);
-    }
-
-    public function getCharacter(int $id): JsonResponse
-    {
-        $data = $this->starWarsService->getCharacter($id);
-
-        if (!$data) {
-            return response()->json([
-                'error' => 'Character not found'
-            ], 404);
-        }
-
-        return response()->json($data);
-    }
-
-    public function searchCharacters(Request $request): JsonResponse
-    {
-        $query = $request->input('q');
-
-        if (!$query) {
-            return response()->json([
-                'error' => 'Search query is required'
-            ], 400);
-        }
-
-        $startTime = microtime(true);
-        $data = $this->starWarsService->searchCharacters($query);
-        $responseTime = microtime(true) - $startTime;
-
-        if (!$data) {
-            return response()->json([
-                'error' => 'Failed to search characters'
-            ], 500);
-        }
-
-        // Record the search statistic
-        SearchStatistic::create([
-            'query' => $query,
-            'response_time' => $responseTime,
-            'timestamp' => now()
+        Log::info('StarWarsController@searchPeople called', [
+            'ip' => $request->ip(),
+            'timestamp' => now()->toDateTimeString(),
         ]);
-
-        return response()->json($data);
+        // Ignora o parâmetro recebido e busca todos os personagens
+        $response = Http::withOptions(['verify' => false])->get('https://swapi.dev/api/people');
+        return response()->json($response->json(), $response->status());
+        
     }
 
-    public function getStatistics(): JsonResponse
+    public function searchMovies(Request $request)
     {
-        $statistics = Cache::get('search_statistics');
-
-        if (!$statistics) {
-            return response()->json([
-                'error' => 'Statistics not available'
-            ], 404);
-        }
-
-        return response()->json($statistics);
-    }
-
-    public function searchMovies(Request $request): JsonResponse
-    {
-        $query = $request->input('q');
-
-        if (!$query) {
-            return response()->json([
-                'error' => 'Search query is required'
-            ], 400);
-        }
-
-        $startTime = microtime(true);
-        $data = $this->starWarsService->searchMovies($query);
-        $responseTime = microtime(true) - $startTime;
-
-        if (!$data) {
-            return response()->json([
-                'error' => 'Failed to search movies'
-            ], 500);
-        }
-
-        // Record the search statistic
-        SearchStatistic::create([
-            'query' => $query,
-            'response_time' => $responseTime,
-            'timestamp' => now()
+        Log::info('StarWarsController@searchMovies called', [
+            'ip' => $request->ip(),
+            'timestamp' => now()->toDateTimeString(),
         ]);
-
-        return response()->json($data);
+        // Ignora o parâmetro recebido e busca todos os filmes
+        $response = Http::withOptions(['verify' => false])->get('https://swapi.dev/api/films');
+        return response()->json($response->json(), $response->status());
     }
 } 
