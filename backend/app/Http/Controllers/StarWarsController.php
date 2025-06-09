@@ -31,4 +31,16 @@ class StarWarsController extends Controller
         $response = Http::withOptions(['verify' => false])->get('https://swapi.dev/api/films');
         return response()->json($response->json(), $response->status());
     }
+
+    public function getPersonById($id)
+    {
+        $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/people/{$id}/");
+        return response()->json($response->json(), $response->status());
+    }
+
+    public function getMovieById($id)
+    {
+        $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/films/{$id}/");
+        return response()->json($response->json(), $response->status());
+    }
 } 

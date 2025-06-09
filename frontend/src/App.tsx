@@ -11,6 +11,8 @@ import {
 const API_URL = process.env.REACT_APP_API_URL || '';
 const BACKEND_PEOPLE = `${API_URL}/api/star-wars/characters/search?q=`;
 const BACKEND_MOVIES = `${API_URL}/api/star-wars/movies/search?q=`;
+const BACKEND_PERSON_DETAILS = `${API_URL}/api/star-wars/characters/`;
+const BACKEND_MOVIE_DETAILS = `${API_URL}/api/star-wars/movies/`;
 
 function getIdFromUrl(url: string, type: 'people' | 'films') {
   const match = url.match(type === 'people' ? /\/people\/(\d+)\/?$/ : /\/films\/(\d+)\/?$/);
@@ -158,16 +160,20 @@ const PersonDetails: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`https://swapi.dev/api/people/${id}/`)
+    fetch(`${BACKEND_PERSON_DETAILS}${id}`)
       .then(res => res.json())
       .then(async data => {
         setPerson(data);
         // Buscar títulos dos filmes
         if (Array.isArray(data.films)) {
           const filmsData = await Promise.all(
-            data.films.map((filmUrl: string) => fetch(filmUrl).then(r => r.json()))
+            data.films.map((filmUrl: string) => {
+              const filmId = getIdFromUrl(filmUrl, 'films');
+              if (!filmId) return null;
+              return fetch(`${BACKEND_MOVIE_DETAILS}${filmId}`).then(r => r.json());
+            })
           );
-          setMovies(filmsData);
+          setMovies(filmsData.filter(Boolean));
         }
         setLoading(false);
       });
@@ -221,16 +227,20 @@ const MovieDetails: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`https://swapi.dev/api/films/${id}/`)
+    fetch(`${BACKEND_MOVIE_DETAILS}${id}`)
       .then(res => res.json())
       .then(async data => {
         setMovie(data);
         // Buscar nomes dos personagens
         if (Array.isArray(data.characters)) {
           const charsData = await Promise.all(
-            data.characters.map((charUrl: string) => fetch(charUrl).then(r => r.json()))
+            data.characters.map((charUrl: string) => {
+              const charId = getIdFromUrl(charUrl, 'people');
+              if (!charId) return null;
+              return fetch(`${BACKEND_PERSON_DETAILS}${charId}`).then(r => r.json());
+            })
           );
-          setCharacters(charsData);
+          setCharacters(charsData.filter(Boolean));
         }
         setLoading(false);
       });
