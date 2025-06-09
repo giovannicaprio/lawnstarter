@@ -86,4 +86,34 @@ class StarWarsController extends Controller
 
         return response()->json($statistics);
     }
+
+    public function searchMovies(Request $request): JsonResponse
+    {
+        $query = $request->input('q');
+
+        if (!$query) {
+            return response()->json([
+                'error' => 'Search query is required'
+            ], 400);
+        }
+
+        $startTime = microtime(true);
+        $data = $this->starWarsService->searchMovies($query);
+        $responseTime = microtime(true) - $startTime;
+
+        if (!$data) {
+            return response()->json([
+                'error' => 'Failed to search movies'
+            ], 500);
+        }
+
+        // Record the search statistic
+        SearchStatistic::create([
+            'query' => $query,
+            'response_time' => $responseTime,
+            'timestamp' => now()
+        ]);
+
+        return response()->json($data);
+    }
 } 

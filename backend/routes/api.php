@@ -25,4 +25,5 @@ Route::prefix('star-wars')->group(function () {
     Route::get('/characters/search', [StarWarsController::class, 'searchCharacters']);
     Route::get('/characters/{id}', [StarWarsController::class, 'getCharacter'])->where('id', '[0-9]+');
     Route::get('/statistics', [StarWarsController::class, 'getStatistics']);
+    Route::get('/movies/search', [StarWarsController::class, 'searchMovies']);
 }); 
