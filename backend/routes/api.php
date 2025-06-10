@@ -8,6 +8,7 @@ Route::prefix('star-wars')->group(function () {
     Route::get('/movies/search', [StarWarsController::class, 'searchMovies']);
     Route::get('/characters/{id}', [StarWarsController::class, 'getPersonById']);
     Route::get('/movies/{id}', [StarWarsController::class, 'getMovieById']);
+    Route::get('/statistics', [StarWarsController::class, 'statistics']);
 });
 
 Route::get('/test', function () {
