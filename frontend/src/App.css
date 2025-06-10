@@ -146,8 +146,8 @@ body, html, #root, .app-bg {
   font-size: 1.05rem;
   text-align: center;
   margin: 0 auto;
-  margin-top: 60px;
   line-height: 1.5;
+  width: 100%;
 }
 
 .results-list {
