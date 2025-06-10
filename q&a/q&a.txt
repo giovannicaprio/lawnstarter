@@ -1,0 +1,27 @@
+1. What are you hoping to find in your next position that would make us the right next step
+in your career?
+
+- I'm looking for a place where I can have a real product impact — where the work I do reaches users quickly and makes their experience meaningfully better. What excites me about this opportunity is the chance to contribute to a consumer-facing platform with scale, where performance, usability, and constant improvement are key.
+
+I'm also drawn to the tech stack — using React and Laravel, which I've worked with extensively, while also deepening my skills in mobile development with React Native. I enjoy writing clean, maintainable code and collaborating with cross-functional teams, and the idea of releasing features daily in a fast-paced environment really appeals to me.
+
+2. What have you learned so far about us that has excited you?
+
+- What really stood out to me is how LawnStarter brings tech into a very traditional industry — lawn care — and creates a platform that makes life easier for both homeowners and service providers. I’ve worked on consumer-facing platforms before, and I know how hard it is to create something that’s both scalable and user-friendly. The fact that you're releasing features daily and constantly optimizing for performance and SEO tells me you’re serious about quality and user experience.
+3. Have you worked in an environment where developers own delivering features all the way to
+production? We have QA (Quality Assurance) and a Product Operations team, however, they exist
+to provide support to engineers. Are you comfortable going to a place where the quality buck stops
+with the engineers and you have the ability to deploy and observe your own code in production?
+
+- Yes, I’ve worked in environments where developers are responsible for delivering features all the way to production, and I believe that’s a healthy approach when done with balance. In my current project, I work across several systems, and in one of them my team has direct interaction with clients. We have the flexibility to release updates quickly, and it's very rewarding to see the immediate impact of what we build.
+
+I do value QA processes and believe they play an important role in maintaining quality — especially when it comes to edge cases and regression testing. But I also believe that engineers should take ownership of their code — from understanding the business context, to writing solid tests, to making sure the feature works in production.
+
+I understand that in a competitive market, time-to-market is critical, and sometimes we need to move fast to respond to opportunities or issues. In those cases, having developers who are comfortable owning the deployment and monitoring of their code is essential. I’ve used tools like GitHub Actions and Jenkins to support these workflows, and I’m very comfortable being accountable for what I ship.
+
+
+4. What is the next technology or subject you are hoping to learn about?
+
+- Right now, I’m really interested in deepening my knowledge of React Native and mobile performance optimization. Since this role involves both web and mobile development, I see it as a great opportunity to strengthen that side of my skill set and build apps that perform well across platforms.
+
+I'm also exploring DevOps practices more — especially in terms of observability, monitoring, and automated testing. I think the more an engineer understands the full lifecycle of software — from code to deployment to production behavior — the better decisions they can make during development.

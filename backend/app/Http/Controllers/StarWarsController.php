@@ -15,10 +15,32 @@ class StarWarsController extends Controller
             'ip' => $request->ip(),
             'timestamp' => now()->toDateTimeString(),
         ]);
-        // Ignora o parâmetro recebido e busca todos os personagens
-        $response = Http::withOptions(['verify' => false])->get('https://swapi.dev/api/people');
-        return response()->json($response->json(), $response->status());
-        
+        $query = $request->query('q');
+        $cacheKey = 'swapi_people_all_pages';
+        $allPeople = cache()->remember($cacheKey, 300, function () {
+            $all = [];
+            $url = 'https://swapi.dev/api/people';
+            do {
+                $response = Http::withOptions(['verify' => false])->get($url);
+                $data = $response->json();
+                if (isset($data['results'])) {
+                    $all = array_merge($all, $data['results']);
+                }
+                $url = $data['next'] ?? null;
+            } while ($url);
+            return $all;
+        });
+        $filtered = $allPeople;
+        if ($query) {
+            $filtered = array_filter($allPeople, function ($person) use ($query) {
+                return stripos($person['name'], $query) !== false;
+            });
+        }
+        $result = [
+            'count' => count($filtered),
+            'results' => array_values($filtered),
+        ];
+        return response()->json($result);
     }
 
     public function searchMovies(Request $request)
@@ -27,20 +49,57 @@ class StarWarsController extends Controller
             'ip' => $request->ip(),
             'timestamp' => now()->toDateTimeString(),
         ]);
-        // Ignora o parâmetro recebido e busca todos os filmes
-        $response = Http::withOptions(['verify' => false])->get('https://swapi.dev/api/films');
-        return response()->json($response->json(), $response->status());
+        $query = $request->query('q');
+        $cacheKey = 'swapi_movies_all_pages';
+        $allMovies = cache()->remember($cacheKey, 300, function () {
+            $all = [];
+            $url = 'https://swapi.dev/api/films';
+            do {
+                $response = Http::withOptions(['verify' => false])->get($url);
+                $data = $response->json();
+                if (isset($data['results'])) {
+                    $all = array_merge($all, $data['results']);
+                }
+                $url = $data['next'] ?? null;
+            } while ($url);
+            return $all;
+        });
+        $filtered = $allMovies;
+        if ($query) {
+            $filtered = array_filter($allMovies, function ($movie) use ($query) {
+                return stripos($movie['title'], $query) !== false;
+            });
+        }
+        $result = [
+            'count' => count($filtered),
+            'results' => array_values($filtered),
+        ];
+        return response()->json($result);
     }
 
     public function getPersonById($id)
     {
-        $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/people/{$id}/");
-        return response()->json($response->json(), $response->status());
+        $cacheKey = 'swapi_person_' . $id;
+        $responseData = cache()->remember($cacheKey, 300, function () use ($id) {
+            $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/people/{$id}/");
+            return [
+                'body' => $response->json(),
+                'status' => $response->status(),
+            ];
+        });
+        return response()->json($responseData['body'], $responseData['status']);
     }
 
     public function getMovieById($id)
     {
-        $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/films/{$id}/");
-        return response()->json($response->json(), $response->status());
+        $cacheKey = 'swapi_movie_' . $id;
+        $responseData = cache()->remember($cacheKey, 300, function () use ($id) {
+            $response = Http::withOptions(['verify' => false])->get("https://swapi.dev/api/films/{$id}/");
+            return [
+                'body' => $response->json(),
+                'status' => $response->status(),
+            ];
+        });
+        return response()->json($responseData['body'], $responseData['status']);
     }
 } 
