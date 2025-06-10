@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import {
   BrowserRouter as Router,
@@ -33,46 +33,156 @@ const SearchPage: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SwapiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [showResultsMobile, setShowResultsMobile] = useState(false);
   const navigate = useNavigate();
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Debounced auto-search when query changes and is 2+ chars
+  useEffect(() => {
     if (query.trim().length >= 2) {
-      setIsSearching(true);
-      setError(null);
-      const endpoint = searchType === 'people' ? BACKEND_PEOPLE : BACKEND_MOVIES;
-      fetch(endpoint + encodeURIComponent(query.trim()))
-        .then(async res => {
-          if (!res.ok) {
-            const err = await res.text();
-            console.error('API error response:', err);
-            throw new Error(err || 'API error');
-          }
-          return res.json();
-        })
-        .then(data => {
-          console.log('API response:', data);
-          if (!data || typeof data !== 'object' || !Array.isArray(data.results)) {
-            setError('Invalid response from backend');
-            setResults(null);
-          } else {
-            setResults(data);
-          }
-          setIsSearching(false);
-        })
-        .catch((e) => {
-          console.error('Fetch error:', e);
-          setError('Error fetching data');
-          setResults(null);
-          setIsSearching(false);
-        });
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+      debounceTimeout.current = setTimeout(() => {
+        handleSearch();
+        if (isMobile) setShowResultsMobile(true);
+      }, 400);
     } else {
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
       setResults(null);
-      setIsSearching(false);
+      setError(null);
+      if (isMobile) setShowResultsMobile(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, searchType]);
+
+  const handleSearch = () => {
+    if (query.trim().length < 2) return;
+    setIsSearching(true);
+    setError(null);
+    const endpoint = searchType === 'people' ? BACKEND_PEOPLE : BACKEND_MOVIES;
+    fetch(endpoint + encodeURIComponent(query.trim()))
+      .then(async res => {
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(err || 'API error');
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!data || typeof data !== 'object' || !Array.isArray(data.results)) {
+          setError('Invalid response from backend');
+          setResults(null);
+        } else {
+          setResults(data);
+        }
+        setIsSearching(false);
+      })
+      .catch(() => {
+        setError('Error fetching data');
+        setResults(null);
+        setIsSearching(false);
+      });
+  };
 
   const hasResults = results && Array.isArray(results.results) && results.results.length > 0;
 
+  // --- MOBILE LAYOUT ---
+  if (isMobile) {
+    return (
+      <div className="main-content" style={{ minHeight: '100vh' }}>
+        <section className="search-card">
+          {/* SEARCH UI */}
+          {!showResultsMobile && (
+            <>
+              <div className="search-title">What are you searching for?</div>
+              <div className="search-type-group">
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="searchType"
+                    checked={searchType === 'people'}
+                    onChange={() => setSearchType('people')}
+                  />
+                  <span>People</span>
+                </label>
+                <label className="radio-label">
+                  <input
+                    type="radio"
+                    name="searchType"
+                    checked={searchType === 'movies'}
+                    onChange={() => setSearchType('movies')}
+                  />
+                  <span>Movies</span>
+                </label>
+              </div>
+              <input
+                className="search-input"
+                type="text"
+                placeholder="e.g. Chewbacca, Yoda"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+              />
+            </>
+          )}
+          {/* RESULTS UI */}
+          {showResultsMobile && (
+            <>
+              <div className="results-title">Results</div>
+              <hr className="results-divider" />
+              <div className="results-empty">
+                {error && <span style={{ color: 'red' }}>{error}</span>}
+                {!error && (!hasResults) && (
+                  <>
+                    There are zero matches.<br />
+                    Use the form to search for People or Movies.
+                  </>
+                )}
+                {!error && hasResults && (
+                  <ul className="results-list">
+                    {results!.results!.map((item: any, idx: number) => (
+                      <li className="results-item" key={idx}>
+                        <span className="results-name">{searchType === 'people' ? item.name : item.title}</span>
+                        <button className="details-btn" onClick={() => {
+                          const id = getIdFromUrl(item.url, searchType === 'people' ? 'people' : 'films');
+                          if (id) navigate(searchType === 'people' ? `/person/${id}` : `/movie/${id}`);
+                        }}>
+                          SEE DETAILS
+                        </button>
+                        {idx !== results!.results!.length - 1 && <div className="results-separator" />}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+        </section>
+        {/* Fixed button at the bottom */}
+        <button
+          className={`search-btn search-btn-mobile-fixed${isSearching ? ' searching' : ''}`}
+          disabled={(!showResultsMobile && query.trim().length < 2) || isSearching}
+          onClick={() => {
+            if (showResultsMobile) {
+              setShowResultsMobile(false);
+            } else {
+              handleSearch();
+              setShowResultsMobile(true);
+            }
+          }}
+        >
+          {isSearching ? 'SEARCHING...' : (showResultsMobile ? 'BACK TO SEARCH' : 'SEARCH')}
+        </button>
+      </div>
+    );
+  }
+
+  // --- DESKTOP LAYOUT ---
   return (
     <main className="main-content">
       <section className="search-card">
@@ -104,8 +214,8 @@ const SearchPage: React.FC = () => {
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
-        <button className="search-btn" disabled={query.trim().length < 2 || isSearching}>
-          {isSearching ? 'SEARCHING' : 'SEARCH'}
+        <button className="search-btn" disabled={query.trim().length < 2 || isSearching} onClick={handleSearch}>
+          {isSearching ? 'SEARCHING...' : 'SEARCH'}
         </button>
       </section>
       <section className="results-card">
@@ -124,21 +234,12 @@ const SearchPage: React.FC = () => {
               {results!.results!.map((item: any, idx: number) => (
                 <li className="results-item" key={idx}>
                   <span className="results-name">{searchType === 'people' ? item.name : item.title}</span>
-                  {searchType === 'people' ? (
-                    <button className="details-btn" onClick={() => {
-                      const id = getIdFromUrl(item.url, 'people');
-                      if (id) navigate(`/person/${id}`);
-                    }}>
-                      SEE DETAILS
-                    </button>
-                  ) : (
-                    <button className="details-btn" onClick={() => {
-                      const id = getIdFromUrl(item.url, 'films');
-                      if (id) navigate(`/movie/${id}`);
-                    }}>
-                      SEE DETAILS
-                    </button>
-                  )}
+                  <button className="details-btn" onClick={() => {
+                    const id = getIdFromUrl(item.url, searchType === 'people' ? 'people' : 'films');
+                    if (id) navigate(searchType === 'people' ? `/person/${id}` : `/movie/${id}`);
+                  }}>
+                    SEE DETAILS
+                  </button>
                   {idx !== results!.results!.length - 1 && <div className="results-separator" />}
                 </li>
               ))}
@@ -291,4 +392,4 @@ const App: React.FC = () => (
   </Router>
 );
 
-export default App; 
+export default App;
