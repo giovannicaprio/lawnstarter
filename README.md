@@ -1,46 +1,47 @@
 # SWStarter - Star Wars Search App
 
-## Descrição
+A fullstack Star Wars search application with a modern, responsive UI and a high-performance backend proxy.
 
-Este projeto é uma aplicação fullstack para busca de personagens e filmes do universo Star Wars, utilizando a [Star Wars API (SWAPI)](https://swapi.dev/). O backend PHP/Laravel serve apenas como proxy entre o frontend React e a API externa, seguindo as melhores práticas para esse tipo de arquitetura.
+## Features
 
-## Estrutura
-- **Frontend:** React + TypeScript (pasta `frontend/`)
-- **Backend:** Laravel (pasta `backend/`)
-- **Banco de dados:** Não utilizado (backend é stateless)
-- **Docker:** Orquestra frontend, backend e banco (MySQL, apenas para compatibilidade, não é usado)
+- **Frontend:** React + TypeScript
+  - Responsive layout: mobile (single card) and desktop (side-by-side cards)
+  - Instant search: results update as you type (2+ characters)
+  - Modern, clean UI styled for both mobile and desktop
 
-## Como rodar o projeto
+- **Backend:** Laravel (PHP)
+  - Acts as a proxy to the [Star Wars API (SWAPI)](https://swapi.dev/)
+  - **Caching:** All SWAPI responses are cached for 5 minutes for fast repeated queries
+  - **Filtering:** Search endpoints filter by name (people) or title (movies) using the `q` parameter (case-insensitive, partial match)
+  - Fetches and filters the entire SWAPI dataset, not just the first page
+  - Stateless: no database required
 
-### Pré-requisitos
-- Docker e Docker Compose instalados
+## How to Run (with Docker)
 
-### Passos
-1. **Build e start dos containers:**
+1. **Build and start all services:**
    ```bash
    docker compose up --build -d
    ```
-2. **Acesse o frontend:**
-   - [http://localhost:3000](http://localhost:3000)
-3. **Acesse o backend (API):**
-   - [http://localhost:8000/api/star-wars/characters/search?q=luke](http://localhost:8000/api/star-wars/characters/search?q=luke)
-   - [http://localhost:8000/api/star-wars/movies/search?q=hope](http://localhost:8000/api/star-wars/movies/search?q=hope)
+2. **Access the app:**
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Backend API: [http://localhost:8000/api/star-wars/characters/search?q=luke](http://localhost:8000/api/star-wars/characters/search?q=luke)
 
-## Endpoints disponíveis
+## Example Endpoints
 
-- `GET /api/star-wars/characters/search?q=...` — Busca personagens na SWAPI
-- `GET /api/star-wars/movies/search?q=...` — Busca filmes na SWAPI
+- `GET /api/star-wars/characters/search?q=...` — Search people by name
+- `GET /api/star-wars/movies/search?q=...` — Search movies by title
+- `GET /api/star-wars/characters/{id}` — Get person details
+- `GET /api/star-wars/movies/{id}` — Get movie details
 
-O backend apenas repassa a requisição para a SWAPI e retorna o JSON puro.
+## Notes
+- No database or persistent storage is required.
+- The backend only proxies and filters SWAPI data, returning results quickly thanks to caching.
+- The frontend never calls SWAPI directly, only the backend API.
 
-## Observações
-- Não há persistência de dados, estatísticas ou cache no backend.
-- O backend não depende do banco de dados para funcionar.
-- O frontend consome apenas os endpoints do backend, nunca acessa a SWAPI diretamente.
+## Q&A Folder
 
-## Customização
-Se quiser adicionar endpoints para detalhes de personagem ou filme, basta criar novos métodos no controller que façam proxy para os endpoints correspondentes da SWAPI.
+This project includes a `q&a` folder containing answers and explanations in a different format, intended for appreciation and review purposes. You can refer to this folder to understand design decisions, implementation details, and reasoning behind key features.
 
 ---
 
-Feito com ❤️ para o desafio LawnStarter. 
+Made with ❤️ for the LawnStarter challenge. 
