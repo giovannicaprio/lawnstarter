@@ -4,6 +4,61 @@ A fullstack Star Wars search application with a modern, responsive UI and a high
 
 ## Project Structure
 
+## Estrutura Detalhada do Projeto
+
+```
+lawnstarter/
+├── backend/
+│   ├── app/
+│   │   ├── Console/
+│   │   │   └── Commands/
+│   │   │       └── ComputeSearchStatistics.php
+│   │   ├── Http/
+│   │   │   └── Controllers/
+│   │   │       └── StarWarsController.php
+│   │   └── Models/
+│   ├── bootstrap/
+│   ├── config/
+│   ├── database/
+│   ├── public/
+│   ├── resources/
+│   ├── routes/
+│   │   └── api.php
+│   ├── storage/
+│   ├── tests/
+│   │   ├── Feature/
+│   │   │   └── StarWarsControllerTest.php
+│   │   ├── Unit/
+│   │   │   ├── ComputeSearchStatisticsTest.php
+│   │   │   └── ExampleTest.php
+│   │   └── TestCase.php
+│   ├── Dockerfile
+│   ├── composer.json
+│   ├── composer.lock
+│   ├── phpunit.xml
+│   └── ...
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── SearchPage.tsx
+│   │   │   ├── SearchPage.test.tsx
+│   │   │   ├── MovieDetailsPage.tsx
+│   │   │   ├── PersonDetailsPage.tsx
+│   │   │   └── StatsPage.tsx
+│   │   ├── types/
+│   │   │   └── swapi.ts
+│   │   ├── utils/
+│   │   │   └── getIdFromUrl.ts
+│   │   ├── App.tsx
+│   │   ├── App.css
+│   │   └── index.tsx
+│   ├── package.json
+│   ├── package-lock.json
+│   └── ...
+├── docker-compose.yml
+└── README.md
+```
+
 - **Frontend** (`frontend/`)
   - Built with React + TypeScript
   - Responsive layout: mobile (single card) and desktop (side-by-side cards)
@@ -40,9 +95,11 @@ A fullstack Star Wars search application with a modern, responsive UI and a high
 - `GET /api/star-wars/statistics` — Get latest computed search statistics (top queries, average response time, most popular hour)
 
 ## How Statistics Work
-- Every search request is logged to the database with query, type, response time, and timestamp
-- Every 5 minutes, a scheduled job computes statistics and stores them in cache
-- The statistics endpoint returns the latest cached stats instantly
+
+
+Each query is logged in the database with the query, type, response time, and timestamp. Every 5 minutes, a scheduled job calculates statistics and caches them. The statistics endpoint returns the latest data instantly.
+
+![Exemplo de Estatísticas](stats_exemplo.png)
 
 ## How to Run (with Docker)
 
