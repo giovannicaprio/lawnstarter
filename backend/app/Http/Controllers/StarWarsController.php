@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\SearchStatistic;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
 
 class StarWarsController extends Controller
@@ -17,6 +20,7 @@ class StarWarsController extends Controller
         ]);
         $query = $request->query('q');
         $cacheKey = 'swapi_people_all_pages';
+        $start = microtime(true);
         $allPeople = cache()->remember($cacheKey, 300, function () {
             $all = [];
             $url = 'https://swapi.dev/api/people';
@@ -40,6 +44,13 @@ class StarWarsController extends Controller
             'count' => count($filtered),
             'results' => array_values($filtered),
         ];
+        $duration = microtime(true) - $start;
+        SearchStatistic::create([
+            'query' => $query ?? '',
+            'type' => 'people',
+            'response_time' => $duration,
+            'created_at' => Carbon::now(),
+        ]);
         return response()->json($result);
     }
 
@@ -51,6 +62,7 @@ class StarWarsController extends Controller
         ]);
         $query = $request->query('q');
         $cacheKey = 'swapi_movies_all_pages';
+        $start = microtime(true);
         $allMovies = cache()->remember($cacheKey, 300, function () {
             $all = [];
             $url = 'https://swapi.dev/api/films';
@@ -74,6 +86,13 @@ class StarWarsController extends Controller
             'count' => count($filtered),
             'results' => array_values($filtered),
         ];
+        $duration = microtime(true) - $start;
+        SearchStatistic::create([
+            'query' => $query ?? '',
+            'type' => 'movies',
+            'response_time' => $duration,
+            'created_at' => Carbon::now(),
+        ]);
         return response()->json($result);
     }
 
@@ -101,5 +120,11 @@ class StarWarsController extends Controller
             ];
         });
         return response()->json($responseData['body'], $responseData['status']);
+    }
+
+    public function statistics()
+    {
+        $stats = Cache::get('search_stats', []);
+        return response()->json($stats);
     }
 } 
